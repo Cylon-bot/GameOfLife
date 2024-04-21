@@ -1,39 +1,74 @@
+use std::any::Any;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
-use winit::dpi::{LogicalPosition, LogicalSize};
-use winit::event_loop::{ControlFlow, EventLoop};
-use winit::monitor::MonitorHandle;
+use winit::event::{self, Event, WindowEvent};
+use winit::event_loop::{self, ControlFlow, EventLoop};
 use winit::window::{Fullscreen, WindowBuilder};
 
 fn main() -> Result<(), Error> {
-    let event_loop = EventLoop::new();
+    // create an EventLoop for the game
+    let my_event_loop = EventLoop::new();
+    // create an Windown and attach the EventLoop to it
     let window = {
         WindowBuilder::new()
             .with_title("Game of life")
-            .build(&event_loop)
+            .build(&my_event_loop)
             .unwrap()
-        // .fullscreen()
     };
+    // set the window to fullscreen borderless
     window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-    // window.set_inner_size(LogicalSize::new(2000.0, 1000.0));
-    // window.set_outer_position(LogicalPosition::new(1500.0, 1300.0));
-    // let mut pixels = {
-    //     let window_size = window.inner_size();
-    //     let surface_texture: SurfaceTexture<'_, winit::window::Window> =
-    //         SurfaceTexture::new(window_size.width, window_size.height, &window);
-    //     Pixels::new(320, 240, surface_texture)?
-    // };
-    event_loop.run(move |event, _, control_flow| {
-        // *control_flow = ControlFlow::Poll;
-        // pixels.clear_color(Color::BLUE);
-        // pixels.resize_surface(1500, 1500);
-        // *control_flow = ControlFlow::Exit;
-        // match event {
-        //     Event::WindowEvent {
-        //         event: WindowEvent::CloseRequested,
-        //         ..
-        //     } => elwt.exit(),
-        //     _ => (),
-        // }
+
+    // create a Pixels structure that will be use to redraw pixels on a SurfaceTexture attache to the window
+    let mut pixels = {
+        let window_size = window.inner_size();
+        let surface_texture: SurfaceTexture<'_, winit::window::Window> =
+            SurfaceTexture::new(window_size.width, window_size.height, &window);
+        Pixels::new(window_size.width, window_size.height, surface_texture)?
+    };
+
+    // run the event loop of the game
+    let mut loop_iteration = 1;
+    my_event_loop.run(move |event, _, control_flow| {
+        match event {
+            // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested,
+                ..
+            } => {
+                println!("The close button was pressed; stopping");
+                control_flow.set_exit()
+            }
+            // call this event continuously (main)
+            Event::MainEventsCleared => {
+                if loop_iteration == 1 {
+                    pixels.clear_color(Color::BLACK);
+                    if let Err(_err) = pixels.render() {
+                        println!("OUPS");
+                        control_flow.set_exit();
+                    }
+                } else {
+                    println!("iteration number --> {}", loop_iteration);
+                }
+                // pixels.clear_color(Color::BLACK);
+                // for (_i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
+                //     pixel.copy_from_slice(&[255, 255, 255, 255]);
+                // }
+                // if let Err(_err) = pixels.render() {
+                //     println!("OUPS");
+                //     *control_flow = ControlFlow::Exit;
+                // }
+            }
+            // call when MainEventsCleared is finished
+            Event::RedrawEventsCleared => {
+                loop_iteration += 1;
+                sleep(Duration::new(0, 1e8 as u32));
+            }
+            _ => (),
+        }
+
+        // window.request_redraw();
     })
 }

@@ -1,11 +1,15 @@
-use std::any::Any;
-use std::thread::sleep;
-use std::time::{Duration, Instant};
+mod drawing;
+mod item;
 
+use drawing::game_iteration::GameIteration;
+use drawing::Drawing;
+use item::{BoxGame, Pixel};
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
-use winit::event::{self, Event, WindowEvent};
-use winit::event_loop::{self, ControlFlow, EventLoop};
+use std::thread::sleep;
+use std::time::Duration;
+use winit::event::{Event, WindowEvent};
+use winit::event_loop::EventLoop;
 use winit::window::{Fullscreen, WindowBuilder};
 
 fn main() -> Result<(), Error> {
@@ -20,17 +24,24 @@ fn main() -> Result<(), Error> {
     };
     // set the window to fullscreen borderless
     window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-
     // create a Pixels structure that will be use to redraw pixels on a SurfaceTexture attache to the window
     let mut pixels = {
         let window_size = window.inner_size();
+
         let surface_texture: SurfaceTexture<'_, winit::window::Window> =
             SurfaceTexture::new(window_size.width, window_size.height, &window);
         Pixels::new(window_size.width, window_size.height, surface_texture)?
     };
 
+    let box_window = {
+        let window_size = window.inner_size();
+        BoxGame::new(0, 0, window_size.width as u16, window_size.height as u16)
+    };
+
+    let mut all_pixels = Pixel::create_all_from_grid(&box_window);
     // run the event loop of the game
-    let mut loop_iteration = 1;
+    let mut loop_iteration: u32 = 1;
+    let game_iteration_draw = GameIteration::new([(2000, 800), (2560, 1440)]);
     my_event_loop.run(move |event, _, control_flow| {
         match event {
             // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
@@ -52,14 +63,22 @@ fn main() -> Result<(), Error> {
                 } else {
                     println!("iteration number --> {}", loop_iteration);
                 }
-                // pixels.clear_color(Color::BLACK);
-                // for (_i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
-                //     pixel.copy_from_slice(&[255, 255, 255, 255]);
-                // }
-                // if let Err(_err) = pixels.render() {
-                //     println!("OUPS");
-                //     *control_flow = ControlFlow::Exit;
-                // }
+                all_pixels = game_iteration_draw.draw(&all_pixels, loop_iteration);
+                for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
+                    pixel.copy_from_slice(&[
+                        all_pixels[i].r,
+                        all_pixels[i].g,
+                        all_pixels[i].b,
+                        all_pixels[i].a,
+                    ]);
+                    if i >= box_window.size {
+                        break;
+                    }
+                }
+                if let Err(_err) = pixels.render() {
+                    println!("OUPS");
+                    control_flow.set_exit();
+                }
             }
             // call when MainEventsCleared is finished
             Event::RedrawEventsCleared => {

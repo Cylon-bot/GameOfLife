@@ -29,9 +29,9 @@ impl Pixel {
                     (pixel_to_create % box_window.x2 as u32) as u16,
                     (pixel_to_create / box_window.x2 as u32) as u16,
                 ),
-                r: 255,
-                g: 255,
-                b: 255,
+                r: 0,
+                g: 0,
+                b: 0,
                 a: 255,
             });
             pixel_to_create += 1;
@@ -57,7 +57,7 @@ impl BoxGame {
             y1: y1.min(y2),
             x2: x1.max(x2),
             y2: y1.max(y2),
-            size: x2 as usize * y1 as usize,
+            size: x2 as usize * y2 as usize,
         }
     }
     pub fn is_inside(&self, pixel: &Pixel) -> bool {

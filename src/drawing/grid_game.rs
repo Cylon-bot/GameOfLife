@@ -59,7 +59,6 @@ fn fill_grid(
         my_new_pixel.b = 255;
         my_new_pixel.a = 255;
         fill_thickness = 1;
-        // println!("hola --> {}", coordonate_to_check)
     } else if fill_thickness > 0 {
         my_new_pixel.r = 255;
         my_new_pixel.g = 255;
@@ -88,10 +87,6 @@ impl<'a> Drawing for GridCreation<'a> {
             self.box_coordonate.number_pixel_height,
             self.grid_thickness,
         );
-
-        // println!("number of column --> {}", column_number);
-        // println!("number of line --> {}", line_number);
-
         let mut all_pixels = all_pixels.clone();
         let mut fill_thickness_x: u16 = 0;
         let mut fill_thickness_y: u16 = 0;

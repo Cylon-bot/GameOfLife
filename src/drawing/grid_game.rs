@@ -57,13 +57,13 @@ fn fill_grid(
         my_new_pixel.r = 255;
         my_new_pixel.g = 255;
         my_new_pixel.b = 255;
-        my_new_pixel.a = 255;
+        my_new_pixel.a = 80;
         fill_thickness = 1;
     } else if fill_thickness > 0 {
         my_new_pixel.r = 255;
         my_new_pixel.g = 255;
         my_new_pixel.b = 255;
-        my_new_pixel.a = 255;
+        my_new_pixel.a = 80;
         fill_thickness += 1;
     }
     if fill_thickness == grid_thickness {

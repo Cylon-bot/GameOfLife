@@ -1,13 +1,11 @@
 mod drawing;
 mod item;
 
-use drawing::game_iteration::GameIteration;
+use drawing::grid_game::GridCreation;
 use drawing::Drawing;
 use item::{BoxGame, Pixel};
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
-use std::thread::sleep;
-use std::time::Duration;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::{Fullscreen, WindowBuilder};
@@ -41,7 +39,6 @@ fn main() -> Result<(), Error> {
     let mut all_pixels = Pixel::create_all_from_grid(&box_window);
     // run the event loop of the game
     let mut loop_iteration: u32 = 1;
-    let game_iteration_draw = GameIteration::new([(2500, 1400), (2560, 1440)]);
     my_event_loop.run(move |event, _, control_flow| {
         match event {
             // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
@@ -56,13 +53,12 @@ fn main() -> Result<(), Error> {
             Event::MainEventsCleared => {
                 if loop_iteration == 1 {
                     pixels.clear_color(Color::BLACK);
-                    if let Err(_err) = pixels.render() {
-                        println!("OUPS");
-                        control_flow.set_exit();
-                    }
+                    let my_grid = GridCreation::new(&box_window, 130, 100, 1);
+                    all_pixels = my_grid.draw(&all_pixels, loop_iteration);
                 } else {
                     println!("iteration number --> {}", loop_iteration);
                 }
+
                 for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
                     pixel.copy_from_slice(&[
                         all_pixels[i].r,

@@ -53,7 +53,7 @@ fn main() -> Result<(), Error> {
             Event::MainEventsCleared => {
                 if loop_iteration == 1 {
                     pixels.clear_color(Color::BLACK);
-                    let my_grid = GridCreation::new(&box_window, 130, 100, 1);
+                    let my_grid = GridCreation::new(&box_window, 20, 20, 1);
                     all_pixels = my_grid.draw(&all_pixels, loop_iteration);
                 } else {
                     println!("iteration number --> {}", loop_iteration);

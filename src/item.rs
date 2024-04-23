@@ -32,6 +32,7 @@ impl Pixel {
     }
     pub fn create_all_from_grid(box_window: &BoxGame) -> Vec<Pixel> {
         let number_of_pixels: u32 = box_window.bot_righ.x as u32 * box_window.bot_righ.y as u32;
+
         let mut all_pixels = vec![];
         let mut pixel_to_create: u32 = 0;
         while pixel_to_create < number_of_pixels {
@@ -52,7 +53,11 @@ impl Pixel {
     }
 }
 
-struct Cell {}
+struct Cell {
+    cell_coordonate: BoxGame,
+    is_alive: bool,
+    neighboors: [Box<Cell>;8]
+}
 
 #[derive(Clone, Debug)]
 pub struct BoxGame {

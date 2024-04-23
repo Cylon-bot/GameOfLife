@@ -30,8 +30,9 @@ fn determine_line_column_grid(
     grid_thickness: u16,
 ) -> u16 {
     let mut real_number = 1;
-    while max_number_pixel % (real_number + ((real_number + 1) * grid_thickness)) != 0
-        && max_number_pixel / (real_number + ((real_number + 1) * grid_thickness)) >= number_wanted
+    let modulo = max_number_pixel - 1;
+    while modulo % (real_number + ((real_number + 1) * grid_thickness)) != 0
+        && modulo / (real_number + ((real_number + 1) * grid_thickness)) >= number_wanted
     {
         real_number += 1;
     }
@@ -53,6 +54,9 @@ fn fill_grid(
         pixel.b,
         pixel.a,
     );
+    if fill_thickness == grid_thickness {
+        fill_thickness = 0
+    }
     if coordonate_to_check % (number_grid + ((number_grid + 1) * grid_thickness)) == 0 {
         my_new_pixel.r = 255;
         my_new_pixel.g = 255;
@@ -66,9 +70,7 @@ fn fill_grid(
         my_new_pixel.a = 80;
         fill_thickness += 1;
     }
-    if fill_thickness == grid_thickness {
-        fill_thickness = 0
-    }
+
     (my_new_pixel, fill_thickness)
 }
 impl<'a> Drawing for GridCreation<'a> {

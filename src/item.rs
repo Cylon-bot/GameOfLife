@@ -52,20 +52,56 @@ impl Pixel {
         all_pixels
     }
 }
-
+#[derive(Clone, Debug)]
 pub struct Cell {
-    cell_coordonate: BoxGame,
-    is_alive: bool,
-    neighboors: [Box<Cell>;8]
+    pub cell_coordonate: BoxGame,
+    pub is_alive: bool,
+    // neighboors: [Box<Cell>;8]
 }
 
-impl Cell{
-    pub fn new(cell_coordonate: BoxGame, neighboors: [Box<Cell>;8]) -> Self{
-        Cell{
+impl Cell {
+    pub fn new(cell_coordonate: BoxGame) -> Self {
+        Cell {
             cell_coordonate,
-            is_alive:false,
-            neighboors
+            is_alive: false,
+            // neighboors,
         }
+    }
+
+    pub fn create_all_from_grid(
+        column_number: u16,
+        line_number: u16,
+        grid_thickness: u16,
+    ) -> Vec<Cell> {
+        let mut all_cell: Vec<Cell> = vec![];
+        let mut iteration_loop_x = 0;
+        let mut iteration_loop_y = 0;
+        let mut all_box_cell: Vec<BoxGame> = vec![];
+        let modulo_for_column = column_number + ((column_number + 1) * grid_thickness);
+        let modulo_for_line = line_number + ((line_number + 1) * grid_thickness);
+        loop {
+            let x = modulo_for_column * iteration_loop_x;
+            let y = modulo_for_line * iteration_loop_y;
+            all_box_cell.push(BoxGame::new(
+                x + grid_thickness,
+                y + grid_thickness,
+                x + modulo_for_column - grid_thickness,
+                y + modulo_for_line - grid_thickness,
+            ));
+            if iteration_loop_x == column_number {
+                if iteration_loop_y == line_number {
+                    break;
+                }
+                iteration_loop_x = 0;
+                iteration_loop_y += 1;
+            } else {
+                iteration_loop_x += 1;
+            }
+        }
+        for box_cell in all_box_cell {
+            all_cell.push(Cell::new(box_cell))
+        }
+        all_cell
     }
 }
 

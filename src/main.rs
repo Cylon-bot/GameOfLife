@@ -3,7 +3,7 @@ mod item;
 
 use drawing::grid_game::GridCreation;
 use drawing::Drawing;
-use item::{BoxGame, Pixel};
+use item::{BoxGame, Cell, Pixel};
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
 use winit::event::{Event, WindowEvent};
@@ -37,6 +37,7 @@ fn main() -> Result<(), Error> {
     };
 
     let mut all_pixels = Pixel::create_all_from_grid(&box_window);
+    let mut all_cells: Vec<Cell> = vec![];
     // run the event loop of the game
     let mut loop_iteration: u32 = 1;
     my_event_loop.run(move |event, _, control_flow| {
@@ -53,8 +54,13 @@ fn main() -> Result<(), Error> {
             Event::MainEventsCleared => {
                 if loop_iteration == 1 {
                     pixels.clear_color(Color::BLACK);
-                    let my_grid = GridCreation::new(&box_window, 20, 20, 1);
-                    all_pixels = my_grid.draw(&all_pixels, loop_iteration);
+                    let my_grid = GridCreation::new(&box_window, 130, 100, 1);
+                    (all_pixels, _) = my_grid.draw(&all_pixels, &all_cells, loop_iteration);
+                    all_cells = Cell::create_all_from_grid(
+                        my_grid.column_number,
+                        my_grid.line_number,
+                        my_grid.grid_thickness,
+                    )
                 } else {
                     println!("iteration number --> {}", loop_iteration);
                 }
@@ -66,6 +72,7 @@ fn main() -> Result<(), Error> {
                         all_pixels[i].b,
                         all_pixels[i].a,
                     ]);
+
                     if i >= box_window.size {
                         break;
                     }

@@ -1,4 +1,4 @@
-use crate::item::{BoxGame, Pixel};
+use crate::item::{BoxGame, Cell, Pixel};
 
 use super::Drawing;
 
@@ -7,17 +7,21 @@ pub struct CellState {
     box_coordonate: BoxGame,
 }
 
-
 impl Drawing for CellState {
-    fn draw(&self, all_pixels: &Vec<Pixel>, loop_iteration: u32) -> Vec<Pixel> {
-        let mut all_pixels = all_pixels.clone();
-        for pixel in &mut all_pixels {
-            if self.box_coordonate.is_inside(pixel) {
-                pixel.r = (loop_iteration % 255) as u8;
-                pixel.g = (loop_iteration % 255) as u8;
-                pixel.b = (loop_iteration % 255) as u8;
-            };
+    fn draw(
+        self,
+        _all_pixels: &Vec<Pixel>,
+        all_cells: &Vec<Cell>,
+        _loop_iteration: u32,
+    ) -> (Vec<Pixel>, Vec<Cell>) {
+        let mut all_cells = all_cells.clone();
+        let mut iterator = 1;
+        for cell in &mut all_cells {
+            if iterator % 3 == 0 {
+                cell.is_alive = true;
+            }
+            iterator += 1
         }
-        all_pixels
+        (_all_pixels.to_vec(), all_cells)
     }
 }

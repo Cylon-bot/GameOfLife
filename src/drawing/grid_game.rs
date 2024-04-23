@@ -1,12 +1,13 @@
-use crate::item::{BoxGame, Pixel};
+use crate::item::{BoxGame, Cell, Pixel};
 
 use super::Drawing;
 
+#[derive(Copy, Clone)]
 pub struct GridCreation<'a> {
     box_coordonate: &'a BoxGame,
-    column_number_appoximation: u16,
-    line_number_appoximation: u16,
-    grid_thickness: u16,
+    pub column_number: u16,
+    pub line_number: u16,
+    pub grid_thickness: u16,
 }
 impl<'a> GridCreation<'a> {
     pub fn new(
@@ -17,8 +18,8 @@ impl<'a> GridCreation<'a> {
     ) -> Self {
         GridCreation {
             box_coordonate,
-            column_number_appoximation,
-            line_number_appoximation,
+            column_number: column_number_appoximation,
+            line_number: line_number_appoximation,
             grid_thickness,
         }
     }
@@ -74,43 +75,42 @@ fn fill_grid(
     (my_new_pixel, fill_thickness)
 }
 impl<'a> Drawing for GridCreation<'a> {
-    fn draw(&self, all_pixels: &Vec<Pixel>, _loop_iteration: u32) -> Vec<Pixel> {
-        let mut column_number = self.column_number_appoximation;
-
-        column_number = determine_line_column_grid(
-            column_number,
+    fn draw(
+        mut self,
+        all_pixels: &Vec<Pixel>,
+        _all_cells: &Vec<Cell>,
+        _loop_iteration: u32,
+    ) -> (Vec<Pixel>, Vec<Cell>) {
+        self.column_number = determine_line_column_grid(
+            self.column_number,
             self.box_coordonate.number_pixel_width,
             self.grid_thickness,
         );
-
-        let mut line_number = self.line_number_appoximation;
-        line_number = determine_line_column_grid(
-            line_number,
+        self.line_number = determine_line_column_grid(
+            self.line_number,
             self.box_coordonate.number_pixel_height,
             self.grid_thickness,
         );
         let mut all_pixels = all_pixels.clone();
         let mut fill_thickness_x: u16 = 0;
         let mut fill_thickness_y: u16 = 0;
+
         for pixel in &mut all_pixels {
             (*pixel, fill_thickness_x) = fill_grid(
                 pixel,
-                column_number,
+                self.column_number,
                 self.grid_thickness,
                 pixel.coordonate.x,
                 fill_thickness_x,
             );
             (*pixel, fill_thickness_y) = fill_grid(
                 pixel,
-                line_number,
+                self.line_number,
                 self.grid_thickness,
                 pixel.coordonate.y,
                 fill_thickness_y,
             );
-            if fill_thickness_x == fill_thickness_y && fill_thickness_x == 3{
-                
-            }
         }
-        all_pixels
+        (all_pixels, _all_cells.to_vec())
     }
 }

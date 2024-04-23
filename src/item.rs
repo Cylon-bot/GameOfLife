@@ -53,10 +53,20 @@ impl Pixel {
     }
 }
 
-struct Cell {
+pub struct Cell {
     cell_coordonate: BoxGame,
     is_alive: bool,
     neighboors: [Box<Cell>;8]
+}
+
+impl Cell{
+    pub fn new(cell_coordonate: BoxGame, neighboors: [Box<Cell>;8]) -> Self{
+        Cell{
+            cell_coordonate,
+            is_alive:false,
+            neighboors
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

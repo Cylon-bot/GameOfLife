@@ -107,6 +107,9 @@ impl<'a> Drawing for GridCreation<'a> {
                 pixel.coordonate.y,
                 fill_thickness_y,
             );
+            if fill_thickness_x == fill_thickness_y && fill_thickness_x == 3{
+                
+            }
         }
         all_pixels
     }

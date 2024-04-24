@@ -56,7 +56,7 @@ fn main() -> Result<(), Error> {
             Event::MainEventsCleared => {
                 if loop_iteration == 1 {
                     pixels.clear_color(Color::BLACK);
-                    let my_grid = GridCreation::new(&box_window, 10, 10, 1);
+                    let my_grid = GridCreation::new(&box_window, 50, 30, 1);
                     (all_pixels, _) = my_grid.draw(&all_pixels, &all_cells, loop_iteration);
                     all_cells = Cell::create_all_from_grid(
                         my_grid.column_number,

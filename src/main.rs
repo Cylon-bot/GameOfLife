@@ -1,6 +1,7 @@
 mod drawing;
 mod item;
 
+use drawing::cell_state::CellState;
 use drawing::grid_game::GridCreation;
 use drawing::Drawing;
 use item::{BoxGame, Cell, Pixel};
@@ -40,6 +41,7 @@ fn main() -> Result<(), Error> {
     let mut all_cells: Vec<Cell> = vec![];
     // run the event loop of the game
     let mut loop_iteration: u32 = 1;
+    let cell_state = CellState::new();
     my_event_loop.run(move |event, _, control_flow| {
         match event {
             // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
@@ -54,7 +56,7 @@ fn main() -> Result<(), Error> {
             Event::MainEventsCleared => {
                 if loop_iteration == 1 {
                     pixels.clear_color(Color::BLACK);
-                    let my_grid = GridCreation::new(&box_window, 130, 100, 1);
+                    let my_grid = GridCreation::new(&box_window, 10, 10, 1);
                     (all_pixels, _) = my_grid.draw(&all_pixels, &all_cells, loop_iteration);
                     all_cells = Cell::create_all_from_grid(
                         my_grid.column_number,
@@ -64,6 +66,7 @@ fn main() -> Result<(), Error> {
                 } else {
                     println!("iteration number --> {}", loop_iteration);
                 }
+                (all_pixels, all_cells) = cell_state.draw(&all_pixels, &all_cells, loop_iteration);
 
                 for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
                     pixel.copy_from_slice(&[

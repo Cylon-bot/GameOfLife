@@ -53,13 +53,13 @@ impl Pixel {
     }
 }
 #[derive(Clone, Debug)]
-pub struct Cell {
-    pub cell_coordonate: BoxGame,
+pub struct Cell<'a> {
+    pub cell_coordonate: BoxGame<'a>,
     pub is_alive: bool,
     // neighboors: [Box<Cell>;8]
 }
 
-impl Cell {
+impl<'a> Cell<'a> {
     pub fn new(cell_coordonate: BoxGame) -> Self {
         Cell {
             cell_coordonate,
@@ -72,7 +72,7 @@ impl Cell {
         column_number: u16,
         line_number: u16,
         grid_thickness: u16,
-    ) -> Vec<Cell> {
+    ) -> Vec<Cell<'a>> {
         let mut all_cell: Vec<Cell> = vec![];
         let mut iteration_loop_x = 0;
         let mut iteration_loop_y = 0;
@@ -106,32 +106,40 @@ impl Cell {
 }
 
 #[derive(Clone, Debug)]
-pub struct BoxGame {
+pub struct BoxGame<'a> {
     pub top_left: Coordonate,
     pub bot_righ: Coordonate,
     pub size: usize,
     pub number_pixel_width: u16,
     pub number_pixel_height: u16,
+    pub pixels_associated: Vec<&'a Pixel>,
 }
 
-impl BoxGame {
-    pub fn new(x1: u16, y1: u16, x2: u16, y2: u16) -> Self {
+impl<'a> BoxGame<'a> {
+    pub fn new(x1: u16, y1: u16, x2: u16, y2: u16, all_pixels: &Vec<Pixel>) -> Self {
         let x_min = x1.min(x2);
         let x_max = x1.max(x2);
         let y_min = y1.min(y2);
         let y_max = y1.max(y2);
+        let top_left = Coordonate::new(x_min, y_min);
+        let bot_righ = Coordonate::new(x_max, y_max);
+        let mut pixels_associated: Vec<&Pixel>;
+        for pixel in all_pixels {
+            if pixel.coordonate.x >= top_left.x
+                && pixel.coordonate.x <= bot_righ.x
+                && pixel.coordonate.y >= top_left.y
+                && pixel.coordonate.y <= bot_righ.y
+            {
+                pixels_associated.push(pixel);
+            }
+        }
         BoxGame {
             top_left: Coordonate::new(x_min, y_min),
             bot_righ: Coordonate::new(x_max, y_max),
             size: x2 as usize * y2 as usize,
             number_pixel_width: x_max - x_min + 1,
             number_pixel_height: y_max - y_min + 1,
+            pixels_associated,
         }
-    }
-    pub fn is_inside(&self, pixel: &Pixel) -> bool {
-        pixel.coordonate.x >= self.top_left.x
-            && pixel.coordonate.x <= self.bot_righ.x
-            && pixel.coordonate.y >= self.top_left.y
-            && pixel.coordonate.y <= self.bot_righ.y
     }
 }

@@ -1,47 +1,36 @@
 use crate::item::{BoxGame, Cell, Pixel};
 
-use super::Drawing;
-#[derive(Copy, Clone)]
-pub struct CellState {}
+use super::{grid_game::GridCreation, Drawing};
+pub struct CellState {
+    all_cells: Vec<Cell>,
+}
 impl CellState {
-    pub fn new() -> Self {
-        CellState {}
+    pub fn new(my_grid: &GridCreation, all_pixels: &'static Vec<Pixel>) -> Self {
+        let all_cells = Cell::create_all_from_grid(
+            my_grid.column_number,
+            my_grid.line_number,
+            my_grid.grid_thickness,
+            &all_pixels,
+        );
+        CellState { all_cells }
     }
 }
-fn is_cell_alive(cell: &mut Cell) -> &mut Cell {
-    cell.is_alive = true;
-    cell
-}
 impl Drawing for CellState {
-    fn draw(
-        self,
-        all_pixels: &Vec<Pixel>,
-        all_cells: &Vec<Cell>,
-        _loop_iteration: u32,
-    ) -> (Vec<Pixel>, Vec<Cell>) {
-        let mut all_cells = all_cells.clone();
-        let mut all_pixels = all_pixels.clone();
+    fn draw(self, all_pixels: &mut Vec<Pixel>) -> &mut Vec<Pixel> {
         let mut iterator = 1;
 
-        for mut cell in &mut all_cells {
+        for mut cell in self.all_cells {
             if iterator % 3 == 0 {
-                cell = &mut is_cell_alive(cell);
+                cell.is_alive = true;
+                for pixel_id in cell.cell_coordonate.pixels_associated_id {
+                    all_pixels[pixel_id].r = 255;
+                    all_pixels[pixel_id].g = 255;
+                    all_pixels[pixel_id].b = 255;
+                    all_pixels[pixel_id].a = 255;
+                }
             }
             iterator += 1;
         }
-
-        for pixel in &mut all_pixels {
-            for cell in &mut all_cells {
-                if cell.is_alive {
-                    pixel.r = 255;
-                    pixel.g = 255;
-                    pixel.b = 255;
-                    pixel.a = 255;
-                }
-                iterator += 1
-            }
-        }
-
-        (all_pixels, all_cells)
+        all_pixels
     }
 }

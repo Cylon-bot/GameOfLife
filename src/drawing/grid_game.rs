@@ -75,12 +75,7 @@ fn fill_grid(
     (my_new_pixel, fill_thickness)
 }
 impl<'a> Drawing for GridCreation<'a> {
-    fn draw(
-        mut self,
-        all_pixels: &Vec<Pixel>,
-        _all_cells: &Vec<Cell>,
-        _loop_iteration: u32,
-    ) -> (Vec<Pixel>, Vec<Cell>) {
+    fn draw(mut self, all_pixels: &mut Vec<Pixel>) -> &mut Vec<Pixel> {
         self.column_number = determine_line_column_grid(
             self.column_number,
             self.box_coordonate.number_pixel_width,
@@ -91,11 +86,11 @@ impl<'a> Drawing for GridCreation<'a> {
             self.box_coordonate.number_pixel_height,
             self.grid_thickness,
         );
-        let mut all_pixels = all_pixels.clone();
+
         let mut fill_thickness_x: u16 = 0;
         let mut fill_thickness_y: u16 = 0;
 
-        for pixel in &mut all_pixels {
+        for pixel in &mut *all_pixels {
             (*pixel, fill_thickness_x) = fill_grid(
                 pixel,
                 self.column_number,
@@ -111,6 +106,6 @@ impl<'a> Drawing for GridCreation<'a> {
                 fill_thickness_y,
             );
         }
-        (all_pixels, _all_cells.to_vec())
+        all_pixels
     }
 }

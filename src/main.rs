@@ -4,7 +4,7 @@ mod item;
 use drawing::cell_state::CellState;
 use drawing::grid_game::GridCreation;
 use drawing::Drawing;
-use item::{BoxGame, Cell, Pixel};
+use item::{BoxGame, Cell, Coordonate, Pixel};
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
 use winit::event::{Event, WindowEvent};
@@ -32,16 +32,34 @@ fn main() -> Result<(), Error> {
         Pixels::new(window_size.width, window_size.height, surface_texture)?
     };
 
-    let box_window = {
+    let mut all_pixels = {
         let window_size = window.inner_size();
-        BoxGame::new(0, 0, window_size.width as u16, window_size.height as u16)
+        Pixel::create_all_from_grid(Coordonate::new(
+            window_size.width as u16,
+            window_size.height as u16,
+        ))
     };
 
-    let mut all_pixels = Pixel::create_all_from_grid(&box_window);
-    let mut all_cells: Vec<Cell> = vec![];
+    let box_window = {
+        let window_size = window.inner_size();
+        BoxGame::new(
+            0,
+            0,
+            window_size.width as u16,
+            window_size.height as u16,
+            &all_pixels,
+        )
+    };
+
+    let all_cells: Vec<Cell> = vec![];
     // run the event loop of the game
     let mut loop_iteration: u32 = 1;
-    let cell_state = CellState::new();
+    pixels.clear_color(Color::BLACK);
+    let my_grid = GridCreation::new(&box_window, 50, 30, 1);
+    all_pixels = my_grid.draw(&mut all_pixels).to_vec();
+
+    let cell_state = CellState::new(&my_grid, &all_pixels);
+
     my_event_loop.run(move |event, _, control_flow| {
         match event {
             // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
@@ -54,19 +72,8 @@ fn main() -> Result<(), Error> {
             }
             // call this event continuously (main)
             Event::MainEventsCleared => {
-                if loop_iteration == 1 {
-                    pixels.clear_color(Color::BLACK);
-                    let my_grid = GridCreation::new(&box_window, 50, 30, 1);
-                    (all_pixels, _) = my_grid.draw(&all_pixels, &all_cells, loop_iteration);
-                    all_cells = Cell::create_all_from_grid(
-                        my_grid.column_number,
-                        my_grid.line_number,
-                        my_grid.grid_thickness,
-                    )
-                } else {
-                    println!("iteration number --> {}", loop_iteration);
-                }
-                (all_pixels, all_cells) = cell_state.draw(&all_pixels, &all_cells, loop_iteration);
+                println!("iteration number --> {}", loop_iteration);
+                // cell_state.draw(&mut all_pixels);
 
                 for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
                     pixel.copy_from_slice(&[

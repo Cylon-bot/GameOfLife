@@ -77,6 +77,8 @@ impl<'a> Cell<'a> {
     pub fn create_all_from_grid(grid: &GridCreation, all_pixels: &Vec<Pixel>) -> Vec<Cell<'a>> {
         let mut all_cell: Vec<Cell> = vec![];
         let mut map_pixel_to_cell = HashMap::new();
+
+        // create a map to associated a Vec of Pixel to a Cell id
         for pixel in all_pixels {
             let x = pixel.coordonate.x;
             let y = pixel.coordonate.y;
@@ -88,6 +90,8 @@ impl<'a> Cell<'a> {
                 .or_insert_with(Vec::new)
                 .push(pixel.id as usize);
         }
+
+        // create all Cell struct using the map created before
         for (cell_id, cell_map) in map_pixel_to_cell {
             let cell: Cell = Cell::new(BoxGame::new(
                 cell_id.0 as u16,
@@ -100,7 +104,8 @@ impl<'a> Cell<'a> {
         }
         let mut cell_neighboors = vec![];
 
-        for cell in all_cell {
+        // iter over all_cell and create a map to identify all neighboors of each cell
+        for cell in &all_cell {
             let neighboors = [
                 (
                     cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
@@ -137,18 +142,21 @@ impl<'a> Cell<'a> {
             ];
             cell_neighboors.push((cell, neighboors));
         }
-        for (cell, neigboors_coordonate) in &mut cell_neighboors {
-            let mut neigboors_cell = vec![];
-            for neighboor_coordonate in neigboors_coordonate.iter() {
-                if let Some(cell_neighboor) = all_cell.iter().find(|c: &&Cell| {
-                    c.cell_coordonate.top_left.x == neighboor_coordonate.0
-                        && c.cell_coordonate.top_left.y == neighboor_coordonate.1
-                }) {
-                    neigboors_cell.push(cell_neighboor)
-                }
-            }
-            cell.neighboors = Some(neigboors_cell);
-        }
+
+        // // iter over the map created before to modify the cell.neighboors field (cannot do it inside the for before because i need to access to all_cell inside the for already itering on it)
+        // for (cell, neigboors_coordonate) in cell_neighboors {
+        //     let mut neigboors_cell = vec![];
+        //     for neighboor_coordonate in neigboors_coordonate.iter() {
+        //         if let Some(cell_neighboor) = &all_cell.iter().find(|c: &&Cell| {
+        //             c.cell_coordonate.top_left.x == neighboor_coordonate.0
+        //                 && c.cell_coordonate.top_left.y == neighboor_coordonate.1
+        //         }) {
+        //             neigboors_cell.push(*cell_neighboor)
+        //         }
+        //     }
+        //     cell.neighboors = Some(neigboors_cell);
+        // }
+        // all_cell.clone()
         all_cell
     }
 }

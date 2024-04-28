@@ -2,16 +2,17 @@ use crate::item::{BoxGame, Cell, Pixel};
 
 use super::Drawing;
 
-#[derive(Copy, Clone)]
-pub struct GridCreation<'a> {
-    box_coordonate: &'a BoxGame,
+pub struct GridCreation {
+    box_coordonate: BoxGame,
     pub column_number: u16,
     pub line_number: u16,
     pub grid_thickness: u16,
+    pub size_cell_column: Option<u16>,
+    pub size_cell_line: Option<u16>,
 }
-impl<'a> GridCreation<'a> {
+impl GridCreation {
     pub fn new(
-        box_coordonate: &'a BoxGame,
+        box_coordonate: BoxGame,
         column_number_appoximation: u16,
         line_number_appoximation: u16,
         grid_thickness: u16,
@@ -21,27 +22,32 @@ impl<'a> GridCreation<'a> {
             column_number: column_number_appoximation,
             line_number: line_number_appoximation,
             grid_thickness,
+            size_cell_column: None,
+            size_cell_line: None,
         }
     }
 }
 
 fn determine_line_column_grid(
-    number_wanted: u16,
+    wanted_number: u16,
     max_number_pixel: u16,
     grid_thickness: u16,
-) -> u16 {
+) -> Option<u16> {
     let mut real_number = 1;
-    let modulo = max_number_pixel - 1;
-    while modulo % (real_number + ((real_number + 1) * grid_thickness)) != 0
-        && modulo / (real_number + ((real_number + 1) * grid_thickness)) >= number_wanted
+
+    let real_number_of_pixel = max_number_pixel;
+    while (real_number_of_pixel % (real_number + ((real_number + 1) * grid_thickness))) > 10
+        || real_number_of_pixel / (real_number + ((real_number + 1) * grid_thickness))
+            > wanted_number
     {
         real_number += 1;
     }
-    real_number
+    Some(real_number + ((real_number + 1) * grid_thickness))
 }
+
 fn fill_grid(
     pixel: &Pixel,
-    number_grid: u16,
+    modulo: u16,
     grid_thickness: u16,
     coordonate_to_check: u16,
     fill_thickness: u16,
@@ -58,7 +64,7 @@ fn fill_grid(
     if fill_thickness == grid_thickness {
         fill_thickness = 0
     }
-    if coordonate_to_check % (number_grid + ((number_grid + 1) * grid_thickness)) == 0 {
+    if coordonate_to_check % modulo == 0 {
         my_new_pixel.r = 255;
         my_new_pixel.g = 255;
         my_new_pixel.b = 255;
@@ -74,18 +80,24 @@ fn fill_grid(
 
     (my_new_pixel, fill_thickness)
 }
-impl<'a> Drawing for GridCreation<'a> {
-    fn draw(mut self, all_pixels: &mut Vec<Pixel>) -> &mut Vec<Pixel> {
-        self.column_number = determine_line_column_grid(
+impl Drawing for GridCreation {
+    fn draw(&mut self, all_pixels: &mut Vec<Pixel>) {
+        self.size_cell_column = determine_line_column_grid(
             self.column_number,
             self.box_coordonate.number_pixel_width,
             self.grid_thickness,
         );
-        self.line_number = determine_line_column_grid(
+        self.column_number =
+            (self.box_coordonate.number_pixel_width + 1) / self.size_cell_column.unwrap();
+
+        self.size_cell_line = determine_line_column_grid(
             self.line_number,
             self.box_coordonate.number_pixel_height,
             self.grid_thickness,
         );
+
+        self.line_number =
+            (self.box_coordonate.number_pixel_height + 1) / self.size_cell_line.unwrap();
 
         let mut fill_thickness_x: u16 = 0;
         let mut fill_thickness_y: u16 = 0;
@@ -93,19 +105,20 @@ impl<'a> Drawing for GridCreation<'a> {
         for pixel in &mut *all_pixels {
             (*pixel, fill_thickness_x) = fill_grid(
                 pixel,
-                self.column_number,
+                self.size_cell_column.unwrap(),
                 self.grid_thickness,
                 pixel.coordonate.x,
                 fill_thickness_x,
             );
             (*pixel, fill_thickness_y) = fill_grid(
                 pixel,
-                self.line_number,
+                self.size_cell_line.unwrap(),
                 self.grid_thickness,
                 pixel.coordonate.y,
                 fill_thickness_y,
             );
         }
-        all_pixels
+        println!("number of column --> {}", self.column_number);
+        println!("number of line --> {}", self.line_number);
     }
 }

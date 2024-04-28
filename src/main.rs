@@ -31,8 +31,9 @@ fn main() -> Result<(), Error> {
             SurfaceTexture::new(window_size.width, window_size.height, &window);
         Pixels::new(window_size.width, window_size.height, surface_texture)?
     };
-
-    let mut all_pixels = {
+    let mut all_pixels = vec![];
+    let mut id_pixels = vec![];
+    (all_pixels, id_pixels) = {
         let window_size = window.inner_size();
         Pixel::create_all_from_grid(Coordonate::new(
             window_size.width as u16,
@@ -47,18 +48,19 @@ fn main() -> Result<(), Error> {
             0,
             window_size.width as u16,
             window_size.height as u16,
-            &all_pixels,
+            id_pixels,
         )
     };
 
-    let all_cells: Vec<Cell> = vec![];
     // run the event loop of the game
     let mut loop_iteration: u32 = 1;
     pixels.clear_color(Color::BLACK);
-    let my_grid = GridCreation::new(&box_window, 50, 30, 1);
-    all_pixels = my_grid.draw(&mut all_pixels).to_vec();
 
-    let cell_state = CellState::new(&my_grid, &all_pixels);
+    let mut my_grid = GridCreation::new(box_window.clone(), 200, 150, 1);
+    my_grid.draw(&mut all_pixels);
+
+    let mut cell_state = CellState::new(&my_grid, &all_pixels);
+    cell_state.draw(&mut all_pixels);
 
     my_event_loop.run(move |event, _, control_flow| {
         match event {

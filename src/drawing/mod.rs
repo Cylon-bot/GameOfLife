@@ -4,5 +4,5 @@ pub mod cell_state;
 pub mod grid_game;
 
 pub trait Drawing {
-    fn draw(self, all_pixels: &mut Vec<Pixel>) -> &mut Vec<Pixel>;
+    fn draw(&mut self, all_pixels: &mut Vec<Pixel>);
 }

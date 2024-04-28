@@ -15,7 +15,7 @@ impl<'a> Drawing for CellState<'a> {
         let mut iterator = 1;
 
         for cell in &mut self.all_cells {
-            if iterator % 100 == 0 {
+            if iterator % 10 == 0 {
                 cell.is_alive = true;
                 for pixel_id in &cell.cell_coordonate.pixels_associated_id {
                     all_pixels[*pixel_id].r = 255;

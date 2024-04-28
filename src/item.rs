@@ -102,46 +102,46 @@ impl<'a> Cell<'a> {
             ));
             all_cell.push(cell);
         }
-        let mut cell_neighboors = vec![];
+        // let mut cell_neighboors = vec![];
 
-        // iter over all_cell and create a map to identify all neighboors of each cell
-        for cell in &all_cell {
-            let neighboors = [
-                (
-                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x,
-                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y,
-                ),
-                (
-                    cell.cell_coordonate.top_left.x,
-                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-                ),
-                (
-                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-                    cell.cell_coordonate.top_left.y,
-                ),
-            ];
-            cell_neighboors.push((cell, neighboors));
-        }
+        // // iter over all_cell and create a map to identify all neighboors of each cell
+        // for cell in &all_cell {
+        //     let neighboors = [
+        //         (
+        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x,
+        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y,
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x,
+        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+        //         ),
+        //         (
+        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+        //             cell.cell_coordonate.top_left.y,
+        //         ),
+        //     ];
+        //     cell_neighboors.push((cell, neighboors));
+        // }
 
         // // iter over the map created before to modify the cell.neighboors field (cannot do it inside the for before because i need to access to all_cell inside the for already itering on it)
         // for (cell, neigboors_coordonate) in cell_neighboors {

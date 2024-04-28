@@ -59,22 +59,22 @@ impl Pixel {
     }
 }
 #[derive(Clone, Debug)]
-pub struct Cell {
+pub struct Cell<'a> {
     pub cell_coordonate: BoxGame,
     pub is_alive: bool,
-    // neighboors: [Box<Cell>;8]
+    pub neighboors: Option<Vec<&'a Cell<'a>>>,
 }
 
-impl Cell {
+impl<'a> Cell<'a> {
     pub fn new(cell_coordonate: BoxGame) -> Self {
         Cell {
             cell_coordonate,
             is_alive: false,
-            // neighboors,
+            neighboors: None,
         }
     }
 
-    pub fn create_all_from_grid(grid: &GridCreation, all_pixels: &Vec<Pixel>) -> Vec<Cell> {
+    pub fn create_all_from_grid(grid: &GridCreation, all_pixels: &Vec<Pixel>) -> Vec<Cell<'a>> {
         let mut all_cell: Vec<Cell> = vec![];
         let mut map_pixel_to_cell = HashMap::new();
         for pixel in all_pixels {
@@ -88,9 +88,8 @@ impl Cell {
                 .or_insert_with(Vec::new)
                 .push(pixel.id as usize);
         }
-
         for (cell_id, cell_map) in map_pixel_to_cell {
-            let cell = Cell::new(BoxGame::new(
+            let cell: Cell = Cell::new(BoxGame::new(
                 cell_id.0 as u16,
                 cell_id.1 as u16,
                 cell_id.0 as u16 + grid.size_cell_column.unwrap(),
@@ -98,6 +97,57 @@ impl Cell {
                 cell_map,
             ));
             all_cell.push(cell);
+        }
+        let mut cell_neighboors = vec![];
+
+        for cell in all_cell {
+            let neighboors = [
+                (
+                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x,
+                    cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y,
+                ),
+                (
+                    cell.cell_coordonate.top_left.x,
+                    cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
+                ),
+                (
+                    cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
+                    cell.cell_coordonate.top_left.y,
+                ),
+            ];
+            cell_neighboors.push((cell, neighboors));
+        }
+        for (cell, neigboors_coordonate) in &mut cell_neighboors {
+            let mut neigboors_cell = vec![];
+            for neighboor_coordonate in neigboors_coordonate.iter() {
+                if let Some(cell_neighboor) = all_cell.iter().find(|c: &&Cell| {
+                    c.cell_coordonate.top_left.x == neighboor_coordonate.0
+                        && c.cell_coordonate.top_left.y == neighboor_coordonate.1
+                }) {
+                    neigboors_cell.push(cell_neighboor)
+                }
+            }
+            cell.neighboors = Some(neigboors_cell);
         }
         all_cell
     }

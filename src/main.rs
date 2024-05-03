@@ -59,8 +59,7 @@ fn main() -> Result<(), Error> {
     let mut my_grid = GridCreation::new(box_window.clone(), 200, 150, 1);
     my_grid.draw(&mut all_pixels);
 
-    let mut cell_state = CellState::new(&my_grid, &all_pixels);
-    cell_state.draw(&mut all_pixels);
+    let mut cell_state = CellState::new(&my_grid, &mut all_pixels);
 
     my_event_loop.run(move |event, _, control_flow| {
         match event {
@@ -75,7 +74,7 @@ fn main() -> Result<(), Error> {
             // call this event continuously (main)
             Event::MainEventsCleared => {
                 println!("iteration number --> {}", loop_iteration);
-                // cell_state.draw(&mut all_pixels);
+                cell_state.draw(&mut all_pixels);
 
                 for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
                     pixel.copy_from_slice(&[

@@ -59,23 +59,26 @@ impl Pixel {
     }
 }
 #[derive(Clone, Debug)]
-pub struct Cell<'a> {
-    pub cell_coordonate: BoxGame,
+pub struct Cell {
+    pub pixels_associated_id: Vec<usize>,
+    pub cell_coordonate: (usize, usize),
     pub is_alive: bool,
-    pub neighboors: Option<Vec<&'a Cell<'a>>>,
 }
 
-impl<'a> Cell<'a> {
-    pub fn new(cell_coordonate: BoxGame) -> Self {
+impl Cell {
+    pub fn new(pixels_associated_id: Vec<usize>, column: usize, line: usize) -> Self {
         Cell {
-            cell_coordonate,
+            pixels_associated_id,
+            cell_coordonate: (column, line),
             is_alive: false,
-            neighboors: None,
         }
     }
 
-    pub fn create_all_from_grid(grid: &GridCreation, all_pixels: &Vec<Pixel>) -> Vec<Cell<'a>> {
-        let mut all_cell: Vec<Cell> = vec![];
+    pub fn create_all_from_grid(
+        grid: &GridCreation,
+        all_pixels: &Vec<Pixel>,
+    ) -> (Vec<Cell>, Vec<Vec<bool>>) {
+        let mut all_cell: Vec<Cell> = Vec::new();
         let mut map_pixel_to_cell = HashMap::new();
 
         // create a map to associated a Vec of Pixel to a Cell id
@@ -84,80 +87,68 @@ impl<'a> Cell<'a> {
             let y = pixel.coordonate.y;
             map_pixel_to_cell
                 .entry((
-                    ((x as f32 / grid.size_cell_column.unwrap() as f32).floor() as u32),
-                    ((y as f32 / grid.size_cell_line.unwrap() as f32).floor() as u32),
+                    ((x as f32 / grid.size_cell_column.unwrap() as f32).floor() as usize),
+                    ((y as f32 / grid.size_cell_line.unwrap() as f32).floor() as usize),
                 ))
                 .or_insert_with(Vec::new)
                 .push(pixel.id as usize);
         }
 
+        let cells_alive: Vec<Vec<bool>> =
+            vec![vec![false; grid.line_number as usize]; grid.column_number as usize];
+
         // create all Cell struct using the map created before
         for (cell_id, cell_map) in map_pixel_to_cell {
-            let cell: Cell = Cell::new(BoxGame::new(
-                cell_id.0 as u16,
-                cell_id.1 as u16,
-                cell_id.0 as u16 + grid.size_cell_column.unwrap(),
-                cell_id.1 as u16 + grid.size_cell_line.unwrap(),
-                cell_map,
-            ));
+            let cell: Cell = Cell::new(cell_map, cell_id.0, cell_id.1);
             all_cell.push(cell);
         }
-        // let mut cell_neighboors = vec![];
+        (all_cell, cells_alive)
+    }
+    pub fn is_alive(&mut self, cells_alive: &Vec<Vec<bool>>) {
+        if self.cell_coordonate.0 > 0 && self.cell_coordonate.0 < cells_alive.len() - 1 {
+            let all_neighboors_column =
+                &cells_alive[self.cell_coordonate.0 - 1..self.cell_coordonate.0 + 2];
+            if self.cell_coordonate.1 > 0 && self.cell_coordonate.1 < cells_alive[0].len() - 1 {
+                let all_neighboors_left = &all_neighboors_column[0]
+                    [self.cell_coordonate.1 - 1..self.cell_coordonate.1 + 2];
+                let neighboor_above = &[all_neighboors_column[1][self.cell_coordonate.1 - 1]];
+                let neighboor_below = &[all_neighboors_column[1][self.cell_coordonate.1 + 1]];
+                let all_neighboors_right = &all_neighboors_column[2]
+                    [self.cell_coordonate.1 - 1..self.cell_coordonate.1 + 2];
 
-        // // iter over all_cell and create a map to identify all neighboors of each cell
-        // for cell in &all_cell {
-        //     let neighboors = [
-        //         (
-        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x,
-        //             cell.cell_coordonate.top_left.y - grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x - grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y,
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x,
-        //             cell.cell_coordonate.top_left.y + grid.size_cell_column.unwrap(),
-        //         ),
-        //         (
-        //             cell.cell_coordonate.top_left.x + grid.size_cell_column.unwrap(),
-        //             cell.cell_coordonate.top_left.y,
-        //         ),
-        //     ];
-        //     cell_neighboors.push((cell, neighboors));
-        // }
-
-        // // iter over the map created before to modify the cell.neighboors field (cannot do it inside the for before because i need to access to all_cell inside the for already itering on it)
-        // for (cell, neigboors_coordonate) in cell_neighboors {
-        //     let mut neigboors_cell = vec![];
-        //     for neighboor_coordonate in neigboors_coordonate.iter() {
-        //         if let Some(cell_neighboor) = &all_cell.iter().find(|c: &&Cell| {
-        //             c.cell_coordonate.top_left.x == neighboor_coordonate.0
-        //                 && c.cell_coordonate.top_left.y == neighboor_coordonate.1
-        //         }) {
-        //             neigboors_cell.push(*cell_neighboor)
-        //         }
-        //     }
-        //     cell.neighboors = Some(neigboors_cell);
-        // }
-        // all_cell.clone()
-        all_cell
+                let all_neighboors = [
+                    neighboor_above,
+                    neighboor_below,
+                    all_neighboors_right,
+                    all_neighboors_left,
+                ];
+                let mut count_neighboors_alive = 0;
+                for neighs in all_neighboors.iter() {
+                    for neigh_solo in neighs.iter() {
+                        if *neigh_solo {
+                            count_neighboors_alive += 1;
+                        }
+                    }
+                }
+                if self.is_alive {
+                    if count_neighboors_alive < 2 {
+                        self.is_alive = false
+                    }
+                    if count_neighboors_alive == 2 || count_neighboors_alive == 3 {
+                        self.is_alive = true
+                    }
+                    if count_neighboors_alive > 3 {
+                        self.is_alive = false
+                    }
+                } else if count_neighboors_alive == 3 {
+                    self.is_alive = true
+                }
+            } else {
+                self.is_alive = false;
+            }
+        } else {
+            self.is_alive = false;
+        }
     }
 }
 

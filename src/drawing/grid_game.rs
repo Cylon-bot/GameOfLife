@@ -1,4 +1,4 @@
-use crate::item::{BoxGame, Cell, Pixel};
+use crate::item::{BoxGame, Pixel};
 
 use super::Drawing;
 

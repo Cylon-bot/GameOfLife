@@ -1,13 +1,18 @@
 mod drawing;
 mod item;
 
+use std::thread::sleep;
+use std::time::Duration;
+
 use drawing::cell_state::CellState;
 use drawing::grid_game::GridCreation;
 use drawing::Drawing;
 use item::{BoxGame, Cell, Coordonate, Pixel};
 use pixels::wgpu::Color;
 use pixels::{Error, Pixels, SurfaceTexture};
-use winit::event::{Event, WindowEvent};
+use winit::event::{
+    DeviceId, ElementState, Event, KeyboardInput, MouseButton, VirtualKeyCode, WindowEvent,
+};
 use winit::event_loop::EventLoop;
 use winit::window::{Fullscreen, WindowBuilder};
 
@@ -61,6 +66,10 @@ fn main() -> Result<(), Error> {
 
     let mut cell_state = CellState::new(&my_grid, &mut all_pixels);
 
+    let mut actual_position_cursor = Coordonate::new(0, 0);
+
+    let mut pause = false;
+
     my_event_loop.run(move |event, _, control_flow| {
         match event {
             // enter on that arm when event is detected on the window and process only the CloseRequested window event (alt + F4)
@@ -71,31 +80,65 @@ fn main() -> Result<(), Error> {
                 println!("The close button was pressed; stopping");
                 control_flow.set_exit()
             }
-            // call this event continuously (main)
-            Event::MainEventsCleared => {
-                println!("iteration number --> {}", loop_iteration);
-                cell_state.draw(&mut all_pixels);
 
-                for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
-                    pixel.copy_from_slice(&[
-                        all_pixels[i].r,
-                        all_pixels[i].g,
-                        all_pixels[i].b,
-                        all_pixels[i].a,
-                    ]);
-
-                    if i >= box_window.size {
-                        break;
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput { input, .. },
+                ..
+            } => {
+                if input.virtual_keycode == Some(VirtualKeyCode::Space)
+                    && input.state == ElementState::Pressed
+                {
+                    pause = !pause;
+                    if pause {
+                        println!("Pause");
+                    } else {
+                        println!("Unpause");
                     }
                 }
-                if let Err(_err) = pixels.render() {
-                    println!("OUPS");
-                    control_flow.set_exit();
+            }
+
+            Event::WindowEvent {
+                event: WindowEvent::CursorMoved { position, .. },
+                ..
+            } => {
+                actual_position_cursor.x = position.x as u16;
+                actual_position_cursor.y = position.y as u16;
+            }
+
+            Event::WindowEvent {
+                event: WindowEvent::MouseInput { button, .. },
+                ..
+            } => if button == MouseButton::Left && pause {},
+            // call this event continuously (main)
+            Event::MainEventsCleared => {
+                if !pause {
+                    println!("iteration number --> {}", loop_iteration);
+                    cell_state.draw(&mut all_pixels);
+
+                    for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
+                        pixel.copy_from_slice(&[
+                            all_pixels[i].r,
+                            all_pixels[i].g,
+                            all_pixels[i].b,
+                            all_pixels[i].a,
+                        ]);
+
+                        if i >= box_window.size {
+                            break;
+                        }
+                    }
+                    if let Err(_err) = pixels.render() {
+                        println!("OUPS");
+                        control_flow.set_exit();
+                    }
                 }
             }
             // call when MainEventsCleared is finished
             Event::RedrawEventsCleared => {
-                loop_iteration += 1;
+                if !pause {
+                    loop_iteration += 1;
+                }
+
                 // sleep(Duration::new(0, 1e1 as u32));
             }
             _ => (),

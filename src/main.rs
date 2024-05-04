@@ -108,7 +108,11 @@ fn main() -> Result<(), Error> {
             Event::WindowEvent {
                 event: WindowEvent::MouseInput { button, .. },
                 ..
-            } => if button == MouseButton::Left && pause {},
+            } => {
+                if button == MouseButton::Left && pause {
+                    cell_state.user_cell_interaction(&actual_position_cursor)
+                }
+            }
             // call this event continuously (main)
             Event::MainEventsCleared => {
                 if !pause {

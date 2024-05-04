@@ -1,4 +1,4 @@
-use crate::item::{BoxGame, Cell, Pixel};
+use crate::item::{BoxGame, Cell, Coordonate, Pixel};
 
 use super::{grid_game::GridCreation, Drawing};
 pub struct CellState {
@@ -25,6 +25,9 @@ impl CellState {
             all_cells,
             cells_alive,
         }
+    }
+    pub fn user_cell_interaction(&self, actual_position_cursor: &Coordonate) {
+        
     }
 }
 impl Drawing for CellState {

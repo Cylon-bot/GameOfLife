@@ -85,6 +85,12 @@ impl Cell {
         for pixel in all_pixels {
             let x = pixel.coordonate.x;
             let y = pixel.coordonate.y;
+            if x % grid.size_cell_column.unwrap() == 0 {
+                continue;
+            }
+            if y % grid.size_cell_line.unwrap() == 0 {
+                continue;
+            }
             map_pixel_to_cell
                 .entry((
                     ((x as f32 / grid.size_cell_column.unwrap() as f32).floor() as usize),
@@ -149,6 +155,17 @@ impl Cell {
         } else {
             self.is_alive = false;
         }
+    }
+    pub fn is_inside(
+        &self,
+        pixel_coordonate: &Coordonate,
+        size_cell_column: u16,
+        size_cell_line: u16,
+    ) -> bool {
+        pixel_coordonate.x >= self.cell_coordonate.0 as u16 * size_cell_column
+            && pixel_coordonate.x < (self.cell_coordonate.0 as u16 + 1) * size_cell_column
+            && pixel_coordonate.y >= self.cell_coordonate.1 as u16 * size_cell_line
+            && pixel_coordonate.y < (self.cell_coordonate.1 as u16 + 1) * size_cell_line
     }
 }
 

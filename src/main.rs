@@ -106,11 +106,27 @@ fn main() -> Result<(), Error> {
             }
 
             Event::WindowEvent {
-                event: WindowEvent::MouseInput { button, .. },
+                event: WindowEvent::MouseInput { button, state, .. },
                 ..
             } => {
-                if button == MouseButton::Left && pause {
-                    cell_state.user_cell_interaction(&actual_position_cursor)
+                if button == MouseButton::Left && state == ElementState::Pressed && pause {
+                    cell_state.user_cell_interaction(&actual_position_cursor, &mut all_pixels);
+                    for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
+                        pixel.copy_from_slice(&[
+                            all_pixels[i].r,
+                            all_pixels[i].g,
+                            all_pixels[i].b,
+                            all_pixels[i].a,
+                        ]);
+
+                        if i >= box_window.size {
+                            break;
+                        }
+                    }
+                    if let Err(_err) = pixels.render() {
+                        println!("OUPS");
+                        control_flow.set_exit();
+                    }
                 }
             }
             // call this event continuously (main)

@@ -65,16 +65,16 @@ fn fill_grid(
         fill_thickness = 0
     }
     if coordonate_to_check % modulo == 0 {
-        my_new_pixel.r = 255;
-        my_new_pixel.g = 255;
-        my_new_pixel.b = 255;
-        my_new_pixel.a = 80;
+        my_new_pixel.r = 200;
+        my_new_pixel.g = 200;
+        my_new_pixel.b = 200;
+        my_new_pixel.a = 20;
         fill_thickness = 1;
     } else if fill_thickness > 0 {
-        my_new_pixel.r = 255;
-        my_new_pixel.g = 255;
-        my_new_pixel.b = 255;
-        my_new_pixel.a = 80;
+        my_new_pixel.r = 200;
+        my_new_pixel.g = 200;
+        my_new_pixel.b = 200;
+        my_new_pixel.a = 20;
         fill_thickness += 1;
     }
 
